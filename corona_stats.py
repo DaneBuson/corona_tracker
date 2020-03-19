@@ -105,7 +105,7 @@ def get_corona(url):
                     ccount += 1
                     #print("#", ccount," - ", child)
                     if (ccount == 2):
-                        statnum = child.string
+                        statnum = child.string.strip()
                 data += 1
                 if (data == 1):
                     corona['Infect'] = statnum
@@ -115,6 +115,15 @@ def get_corona(url):
                     corona['Recove'] = statnum
                 #print("    Statnum = ", statnum)
     return corona 
+
+def get_max_string (*args):
+    max = 0
+
+    for dString in args:
+        if (len(dString) > max):
+            max = len(dString)
+
+    return max
 
 # start main loop
 while True:
@@ -134,19 +143,23 @@ while True:
 
     #get world corona
     url = 'https://www.worldometers.info/coronavirus/'
-    web_corona = get_corona(url)
-    # Write two lines of text.
-    infected = "Infected: " + web_corona['Infect']
-    deaths   = "Deaths  : " + web_corona['Deaths']
+    wo_corona = get_corona(url)
 
+    #get regional corona (us)
     url = 'https://www.worldometers.info/coronavirus/country/us/'
-    web_corona = get_corona(url)
-    # Write two lines of text.
-    us_infected = "Infected: " + web_corona['Infect']
-    us_deaths   = "Deaths  : " + web_corona['Deaths']
+    reg_corona = get_corona(url)
+
+    padding = get_max_string( wo_corona['Infect'], wo_corona['Deaths'], reg_corona['Infect'], reg_corona['Deaths'])
+
+    # format world #'s
+    wo_infected = "Infected: " + wo_corona['Infect'].rjust(padding)
+    wo_deaths   = "Deaths  : " + wo_corona['Deaths'].rjust(padding)
+
+    # format regional #'s
+    reg_infected = "Infected: " + reg_corona['Infect'].rjust(padding)
+    reg_deaths   = "Deaths  : " + reg_corona['Deaths'].rjust(padding)
 
     cmd = "date |cut -c 11-23"
-    #curTime = subprocess.check_output(cmd, shell = True )
     stdoutdata = subprocess.getoutput(cmd)
     curTime = "CVD-19 @ " + stdoutdata.split()[0] + " PDT"
     print (curTime,"\n")
@@ -154,12 +167,12 @@ while True:
     draw.text((x, top),        str(curTime),  font=font, fill=255)
     draw.text((x, top+8),        str("  ----------------"),  font=font, fill=255)
     draw.text((x, top+16),    str("World #"),  font=font, fill=255)
-    draw.text((x, top+24),     str(infected), font=font, fill=255)
-    draw.text((x, top+32),    str(deaths),  font=font, fill=255)
+    draw.text((x, top+24),     str(wo_infected), font=font, fill=255)
+    draw.text((x, top+32),    str(wo_deaths),  font=font, fill=255)
 
     draw.text((x, top+41),    str("US #"),  font=font, fill=255)
-    draw.text((x, top+49),     str(us_infected), font=font, fill=255)
-    draw.text((x, top+57),    str(us_deaths),  font=font, fill=255)
+    draw.text((x, top+49),     str(reg_infected), font=font, fill=255)
+    draw.text((x, top+57),    str(reg_deaths),  font=font, fill=255)
 
     #draw.text((x, top+25),    str(Disk),  font=font, fill=255)
 
