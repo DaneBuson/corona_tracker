@@ -164,8 +164,14 @@ while True:
     curTime = "CVD-19 @ " + stdoutdata.split()[0] + " PDT"
     print (curTime,"\n")
 
+    cmd = " date |cut -c 5-11,25-30"
+    stdoutdata = subprocess.getoutput(cmd)
+    #curDate = " -- " +  stdoutdata.split()[0-2] + " -- "
+    curDate = "  -- " +  stdoutdata + " -- "
+    print (curDate,"\n")
+
     draw.text((x, top),        str(curTime),  font=font, fill=255)
-    draw.text((x, top+8),        str("  ----------------"),  font=font, fill=255)
+    draw.text((x, top+8),        str(curDate),  font=font, fill=255)
     draw.text((x, top+16),    str("World #"),  font=font, fill=255)
     draw.text((x, top+24),     str(wo_infected), font=font, fill=255)
     draw.text((x, top+32),    str(wo_deaths),  font=font, fill=255)
