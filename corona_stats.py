@@ -28,11 +28,26 @@ from PIL import ImageDraw
 from PIL import ImageFont
 
 import subprocess
+import configparser
 
 import re
 import requests
 import time
 from bs4 import BeautifulSoup
+
+
+#Load config file
+
+config = configparser.ConfigParser()
+config.read('tiny_tracker.ini')
+
+corona_refresh = int(config['Corona']['refresh'])
+if (corona_refresh < 1140):
+    corona_refresh = 1140
+
+wo_url = config['Corona']['world']
+reg_url = config['Corona']['region']
+reg_name = config['Corona']['region_name']
 
 # Raspberry Pi pin configuration:
 RST = None     # on the PiOLED this pin isnt used
@@ -131,23 +146,11 @@ while True:
     # Draw a black filled box to clear the image.
     draw.rectangle((0,0,width,height), outline=0, fill=0)
 
-    # Shell scripts for system monitoring from here : https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
-    #cmd = "hostname -I | cut -d\' \' -f1"
-    #IP = subprocess.check_output(cmd, shell = True )
-    #cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
-    #CPU = subprocess.check_output(cmd, shell = True )
-    #cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'"
-    #MemUsage = subprocess.check_output(cmd, shell = True )
-    #cmd = "df -h | awk '$NF==\"/\"{printf \"Disk: %d/%dGB %s\", $3,$2,$5}'"
-    #Disk = subprocess.check_output(cmd, shell = True )
-
     #get world corona
-    url = 'https://www.worldometers.info/coronavirus/'
-    wo_corona = get_corona(url)
+    wo_corona = get_corona(wo_url)
 
     #get regional corona (us)
-    url = 'https://www.worldometers.info/coronavirus/country/us/'
-    reg_corona = get_corona(url)
+    reg_corona = get_corona(reg_url)
 
     padding = get_max_string( wo_corona['Infect'], wo_corona['Deaths'], reg_corona['Infect'], reg_corona['Deaths'])
 
@@ -176,7 +179,7 @@ while True:
     draw.text((x, top+24),     str(wo_infected), font=font, fill=255)
     draw.text((x, top+32),    str(wo_deaths),  font=font, fill=255)
 
-    draw.text((x, top+41),    str("US #"),  font=font, fill=255)
+    draw.text((x, top+41),    str(reg_name+" #"),  font=font, fill=255)
     draw.text((x, top+49),     str(reg_infected), font=font, fill=255)
     draw.text((x, top+57),    str(reg_deaths),  font=font, fill=255)
 
@@ -185,5 +188,5 @@ while True:
     # Display image.
     disp.image(image)
     disp.display()
-    time.sleep(900) #every 15 minutes
+    time.sleep(corona_refresh) 
 
